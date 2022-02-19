@@ -1,0 +1,45 @@
+@page "/customers"
+ 
+@using BlazorApp.Services
+<PageTitle>Customers</PageTitle>
+
+ 
+@inject ICustomerService CustomerService
+
+<h1>Customers</h1>
+
+<p>This component demonstrates fetching data from an internal service using dapr.</p>
+
+@if (customers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Customer customer in customers)
+            {
+                <tr>
+                    <td>@customer.Id</td>
+                    <td>@customer.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Customer>? customers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await CustomerService.GetCustomers();
+    }
+}

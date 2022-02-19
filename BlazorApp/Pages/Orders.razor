@@ -1,0 +1,45 @@
+@page "/orders"
+
+<PageTitle>Orders</PageTitle>
+
+ 
+@using BlazorApp.Services
+@inject IOrderService OrderService
+
+<h1>Orders</h1>
+
+<p>This component demonstrates fetching data from an internal service using dapr.</p>
+
+@if (orders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Order Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Order order in orders)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.OrderDate.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Order>? orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await OrderService.GetOrders();
+    }
+}

@@ -1,0 +1,14 @@
+- name: orderstore
+  type: state.azure.cosmosdb
+  version: v1
+  metadata:
+    - name: url
+      value: https://daprstatestores.documents.azure.com:443/
+    - name: masterkey
+      value: zyB1v8ipQcWdi0tH3Xdd5PXI4CfpDwGsfDPrfAWhx0SaoI6CLG74x4eWRMKLusiwNs3AGs0tBir9qPu5O76dPw==
+    - name: database
+      value: state
+    - name: collection
+      value: orderstate
+
+  
