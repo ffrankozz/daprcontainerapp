@@ -18,9 +18,9 @@ env:
   RESOURCE_GROUP: rg.ffrank
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  WEB_APP_IMAGE_NAME:  web/blazor 
-  CUSTOMERS_API_IMAGE_NAME:  customers/api 
-  ORDERS_API_IMAGE_NAME: orders/api
+  WEB_APP_IMAGE_NAME:  webblazor 
+  CUSTOMERS_API_IMAGE_NAME:  customersapi 
+  ORDERS_API_IMAGE_NAME: ordersapi
 
 
 jobs:
@@ -87,14 +87,14 @@ jobs:
 
       - name: Output image tag
         id: image-tag
-        run: echo "::set-output name=tag-${{ matrix.services.id }}::${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.id }}:sha-$(git rev-parse --short HEAD)" | tr '[:upper:]' '[:lower:]'
+        run: echo "::set-output name=tag-${{ matrix.services.id }}::sha-$(git rev-parse --short HEAD)" | tr '[:upper:]' '[:lower:]'
 
   deploy:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      #- name: Checkout repository
+       # uses: actions/checkout@v2
      
       - name: Azure Login
         uses: azure/login@v1
