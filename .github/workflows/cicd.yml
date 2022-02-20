@@ -26,7 +26,7 @@ jobs:
         services:
           [
             { 'imageName': 'blazor-service', 'directory': './BlazorApp' },
-            { 'imageName': 'customers-service', 'directory': './CustomersApp' },
+            { 'imageName': 'customers-service', 'directory': './CustomersApi' },
             { 'imageName': 'orders-service', 'directory': './OrdersApi' },
           ]
     permissions:
