@@ -83,7 +83,7 @@ jobs:
     needs: [build]
     steps:
       - name: Checkout repository
-        uses: actions/checkout
+        uses: actions/checkout@v2
       - name: Azure Login
         uses: azure/login@v1
         with:
