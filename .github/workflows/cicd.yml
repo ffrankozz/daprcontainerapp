@@ -104,17 +104,17 @@ jobs:
         uses: azure/CLI@v1
         with:
           azcliversion: latest
-          inlineScript:  |  
+          inlineScript:  
             echo "Installing container extension"
             az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
             echo "Starting Deploying Web" 
             az containerapp update \
                 --name blazorapp \
                 --resource-group ${{env.RESOURCE_GROUP}} \
-                --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag_web_blazor}}' \
+                --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag-web-blazor}}' \
                 --debug
 
-             with:
+            
           
 
       - name: Deploy to container app OrdersApp
@@ -128,7 +128,7 @@ jobs:
             az containerapp update \
                 --name ordersapp \
                 --resource-group ${{env.RESOURCE_GROUP}} \
-                --image  --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.ORDERS_API_IMAGE_NAME}}:${{needs.build.outputs.tag_orders_api}}' \ 
+                --image    '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.ORDERS_API_IMAGE_NAME}}:${{needs.build.outputs.tag-orders-api}}' \ 
                 --debug
 
 
