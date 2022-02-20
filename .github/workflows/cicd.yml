@@ -109,7 +109,7 @@ jobs:
             az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
             echo "Starting Deploying Web" 
             az containerapp update \
-                --name blazorapp \
+                --name blazorapp1 \
                 --resource-group ${{env.RESOURCE_GROUP}} \
                 --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag-web-blazor}}' \
                 --debug
