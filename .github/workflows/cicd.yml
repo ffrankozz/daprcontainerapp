@@ -18,6 +18,10 @@ env:
   RESOURCE_GROUP: rg.ffrank
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  WEB_APP_IMAGE_NAME:  web/blazor 
+  CUSTOMERS_API_IMAGE_NAME:  customers/api 
+  ORDERS_API_IMAGE_NAME: orders/api
+
 
 jobs:
   build:
@@ -26,17 +30,27 @@ jobs:
       matrix:
         services:
           [
-            { 'imageName': 'blazor-service', 'directory': './BlazorApp' },
-            { 'imageName': 'customers-service', 'directory': './CustomersApi' },
-            { 'imageName': 'orders-service', 'directory': './OrdersApi' },
+            { 'id': 'web-blazor',
+            'imageName': 'web/blazor', 
+            'directory': './BlazorApp' 
+            },
+            {
+            'id':'customers-api',
+            'imageName': 'customers/api',
+             'directory': './CustomersApi'
+            },
+            {'id':'orders-api',
+             'imageName': 'orders/api',
+             'directory': './OrdersApi'
+            },
           ]
     permissions:
       contents: read
       packages: write
     outputs:
-      image-blazor: ${{ steps.image-tag.outputs.image-blazor-service }}
-      image-customer: ${{ steps.image-tag.outputs.image-customers-service }}
-      image-order: ${{ steps.image-tag.outputs.image-orders-service }}
+      tag-web-blazor: ${{ steps.image-tag.outputs.tag-web-blazor }}
+      tag-customers-api: ${{ steps.image-tag.outputs.tag-customers-api }}
+      tag-orders-api: ${{ steps.image-tag.outputs.tag-orders-api }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -59,10 +73,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=ref,event=branch
             type=sha
 
       # Build and push Docker image with Buildx (don't push on PR)
@@ -77,7 +87,7 @@ jobs:
 
       - name: Output image tag
         id: image-tag
-        run: echo "::set-output name=image-${{ matrix.services.imageName }}::${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}:sha-$(git rev-parse --short HEAD)" | tr '[:upper:]' '[:lower:]'
+        run: echo "::set-output name=tag-${{ matrix.services.id }}::${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.id }}:sha-$(git rev-parse --short HEAD)" | tr '[:upper:]' '[:lower:]'
 
   deploy:
     runs-on: ubuntu-latest
@@ -94,28 +104,28 @@ jobs:
         uses: azure/CLI@v1
         with:
           azcliversion: 2.30.0
-          inlineScript:
+          inlineScript:  |
             echo "Installing container extension"
             az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
             echo "Starting Deploying Web" 
             az containerapp update \
                 --name blazorapp \
                 --resource-group ${{env.RESOURCE_GROUP}} \
-                --image '${{needs.build.outputs.image_blazor}}' \
+                --image '${{env.REGISTERY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag_web_blazor}}' \
                 --debug
 
-      - name: Deploy to container app BlazorApp 
+      - name: Deploy to container app OrdersApp
         uses: azure/CLI@v1
         with:
           azcliversion: 2.30.0
-          inlineScript:
+          inlineScript: |
             echo "Installing container extension"
             az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
             echo "Starting Deploying OrdersApi" 
             az containerapp update \
                 --name ordersapp \
                 --resource-group ${{env.RESOURCE_GROUP}} \
-                --image '${{needs.build.outputs.image_order}}' \
+                --image  --image '${{env.REGISTERY}}/${{env.IMAGE_NAME}}/${{env.ORDERS_API_IMAGE_NAME}}:${{needs.build.outputs.tag_orders_api}}' \ 
                 --debug
 
 
