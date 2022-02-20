@@ -104,5 +104,19 @@ jobs:
                 --image '${{needs.build.outputs.image_blazor}}' \
                 --debug
 
+      - name: Deploy to container app BlazorApp 
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.30.0
+          inlineScript:
+            echo "Installing container extension"
+            az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
+            echo "Starting Deploying OrdersApi" 
+            az containerapp update \
+                --name ordersapp \
+                --resource-group ${{env.RESOURCE_GROUP}} \
+                --image '${{needs.build.outputs.image_order}}' \
+                --debug
+
 
 
