@@ -103,7 +103,7 @@ jobs:
       - name: Deploy to container app BlazorApp 
         uses: azure/CLI@v1
         with:
-          azcliversion: 2.30.0
+          azcliversion: latest
           inlineScript:  |  
             echo "Installing container extension"
             az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
@@ -120,7 +120,7 @@ jobs:
       - name: Deploy to container app OrdersApp
         uses: azure/CLI@v1
         with:
-          azcliversion: 2.30.0
+          azcliversion: latest
           inlineScript:  
             echo "Installing container extension"
             az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
