@@ -111,7 +111,7 @@ jobs:
             az containerapp update \
                 --name blazorapp \
                 --resource-group ${{env.RESOURCE_GROUP}} \
-                --image '${{env.REGISTERY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag_web_blazor}}' \
+                --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag_web_blazor}}' \
                 --debug
 
       - name: Deploy to container app OrdersApp
@@ -125,7 +125,7 @@ jobs:
             az containerapp update \
                 --name ordersapp \
                 --resource-group ${{env.RESOURCE_GROUP}} \
-                --image  --image '${{env.REGISTERY}}/${{env.IMAGE_NAME}}/${{env.ORDERS_API_IMAGE_NAME}}:${{needs.build.outputs.tag_orders_api}}' \ 
+                --image  --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.ORDERS_API_IMAGE_NAME}}:${{needs.build.outputs.tag_orders_api}}' \ 
                 --debug
 
 
