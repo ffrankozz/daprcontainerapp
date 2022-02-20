@@ -78,29 +78,29 @@ jobs:
         id: image-tag
         run: echo "::set-output name=image-${{ matrix.services.imageName }}::${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}:sha-$(git rev-parse --short HEAD)" | tr '[:upper:]' '[:lower:]'
 
-    deploy:
-      runs-on: ubuntu-latest
-      needs: [build]
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout
-        - name: Azure Login
-          uses: azure/login@v1
-          with:
-            creds: ${{secrets.AZURE_CREDENTIALS}}
-        - name: Deploy to container app BlazorApp 
-          uses: azure/CLI@v1
-          with:
-            azcliversion: 2.30.0
-            inlineScript:
-              echo "Installing container extension"
-              az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
-              echo "Starting Deploying Web" 
-              az containerapp update \
-                  --name blazorapp \
-                  --resource-group ${{env.RESOURCE_GROUP}} \
-                  --image '${{needs.build.outputs.image_blazor}}'
-                  --debug
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+      - name: Deploy to container app BlazorApp 
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.30.0
+          inlineScript:
+            echo "Installing container extension"
+            az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
+            echo "Starting Deploying Web" 
+            az containerapp update \
+                --name blazorapp \
+                --resource-group ${{env.RESOURCE_GROUP}} \
+                --image '${{needs.build.outputs.image_blazor}}' \
+                --debug
 
 
 
