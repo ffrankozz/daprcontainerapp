@@ -31,16 +31,16 @@ jobs:
         services:
           [
             { 'id': 'web-blazor',
-            'imageName': 'web/blazor', 
+            'imageName': 'webblazor', 
             'directory': './BlazorApp' 
             },
             {
             'id':'customers-api',
-            'imageName': 'customers/api',
+            'imageName': 'customersapi',
              'directory': './CustomersApi'
             },
             {'id':'orders-api',
-             'imageName': 'orders/api',
+             'imageName': 'ordersapi',
              'directory': './OrdersApi'
             },
           ]
