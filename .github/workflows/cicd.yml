@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=./build.yaml
 name: Build and Deploy
+
 on:
   # Trigger the workflow on push or pull request,
   # but only for the main branch
