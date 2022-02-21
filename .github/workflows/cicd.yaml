@@ -113,6 +113,7 @@ jobs:
                 --name blazorapp \
                 --resource-group ${{env.RESOURCE_GROUP}} \
                 --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag-web-blazor}}' \
+                --registry-login-server ${{ env.REGISTRY }} \
                 --debug
 
             
