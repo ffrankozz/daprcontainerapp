@@ -1,0 +1,136 @@
+# yaml-language-server: $schema=./build.yaml
+
+name: Build and Deploy
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    # Publish semver tags as releases.
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+env:
+  RESOURCE_GROUP: rg.ffrank
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  WEB_APP_IMAGE_NAME:  webblazor 
+  CUSTOMERS_API_IMAGE_NAME:  customersapi 
+  ORDERS_API_IMAGE_NAME: ordersapi
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        services:
+          [
+            { 'id': 'web-blazor',
+            'imageName': 'webblazor', 
+            'directory': './BlazorApp' 
+            },
+            {
+            'id':'customers-api',
+            'imageName': 'customersapi',
+             'directory': './CustomersApi'
+            },
+            {'id':'orders-api',
+             'imageName': 'ordersapi',
+             'directory': './OrdersApi'
+            },
+          ]
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag-web-blazor: ${{ steps.image-tag.outputs.tag-web-blazor }}
+      tag-customers-api: ${{ steps.image-tag.outputs.tag-customers-api }}
+      tag-orders-api: ${{ steps.image-tag.outputs.tag-orders-api }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.services.imageName }}
+          tags: |
+            type=sha
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ matrix.services.directory }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Output image tag
+        id: image-tag
+        run: echo "::set-output name=tag-${{ matrix.services.id }}::sha-$(git rev-parse --short HEAD)" | tr '[:upper:]' '[:lower:]'
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+     
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+      - name: Deploy to container app BlazorApp 
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript:  
+            echo "Installing container extension"
+            az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
+            echo "Starting Deploying Web" 
+            az containerapp create \
+                --name blazorapp1 \
+                --resource-group ${{env.RESOURCE_GROUP}} \
+                --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag-web-blazor}}' \
+                --debug
+
+            
+          
+
+      - name: Deploy to container app OrdersApp
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript:  
+            echo "Installing container extension"
+            az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
+            echo "Starting Deploying OrdersApi" 
+            az containerapp update \
+                --name ordersapp \
+                --resource-group ${{env.RESOURCE_GROUP}} \
+                --image    '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.ORDERS_API_IMAGE_NAME}}:${{needs.build.outputs.tag-orders-api}}' \ 
+                --debug
+
+
+
