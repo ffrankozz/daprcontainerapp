@@ -22,6 +22,7 @@ env:
   WEB_APP_IMAGE_NAME:  webblazor 
   CUSTOMERS_API_IMAGE_NAME:  customersapi 
   ORDERS_API_IMAGE_NAME: ordersapi
+  CONTAINER_APPS_ENVIRONMENT:  my-env 
 
 
 jobs:
@@ -112,6 +113,7 @@ jobs:
             az containerapp update \
                 --name "blazorapp" \
                 --resource-group ${{env.RESOURCE_GROUP}} \
+                --environment ${{env.CONTAINER_APPS_ENVIRONMENT}} \
                 --image '${{env.REGISTRY}}/${{env.IMAGE_NAME}}/${{env.WEB_APP_IMAGE_NAME}}:${{needs.build.outputs.tag-web-blazor}}' \
                  
                 --debug
